@@ -1,25 +1,39 @@
 
 const conexao = require('../config/conexao')
+const {validationResult } = require('express-validator')
+
 
 exports.listar  = (req, res) => {
- const query = "select * from tarefas"
-
- conexao.query(query, (err,rows) =>{
-   if(err){
-      res.status(500)
-      res.json({"message" :"Internal Server Error" })
-      console.log(err)
-   } else if (rows.length > 0){
-    res.status(200)
-    res.json(rows)
-   } else {
-    res.status(404)
-    res.json({"message" : "Nenhuma tarefa encontrada"})
-   }
- })
+ 
+  
+   const query = "select * from tarefas"
+  
+   conexao.query(query, (err,rows) =>{
+     if(err){
+        res.status(500)
+        res.json({"message" :"Internal Server Error" })
+        console.log(err)
+     } else if (rows.length > 0){
+      res.status(200)
+      res.json(rows)
+     } else {
+      res.status(404)
+      res.json({"message" : "Nenhuma tarefa encontrada"})
+     }
+   })
+  
 }
 
+
+
 exports.listarPorID = (req, res)=>{
+  const erros = validationResult(req)
+
+if (!erros.isEmpty()) {
+  return res.status(422).json({"erros":erros.array()})
+}else{
+
+
 const id = req.params.id
 const query = "select * from tarefas where id = ?"
 
@@ -36,9 +50,14 @@ conexao.query(query,[id],(err,rows)=> {
   }
 })
 }
+}
 
 exports.inserir = (req, res) =>{
- 
+  const erros = validationResult(req)
+
+  if (!erros.isEmpty()) {
+    return res.status(422).json({"erros":erros.array()})
+  }else{
   const tarefa = []
   tarefa.push (req.body.descricao)
   tarefa.push (req.body.data)
@@ -58,9 +77,15 @@ exports.inserir = (req, res) =>{
     }
   })
 }
+}
 
 
 exports.alterar = (req,res) => {
+  const erros = validationResult(req)
+
+if (!erros.isEmpty()) {
+  return res.status(422).json({"erros":erros.array()})
+}else{
   const tarefa = []
   tarefa.push(req.body.descricao)
   tarefa.push(req.body.data)
@@ -83,8 +108,13 @@ conexao.query(query,tarefa,(err,rows)=>{
   }
 })
 }
-
+}
 exports.excluir = (req,res) => {
+  const erros = validationResult(req)
+
+if (!erros.isEmpty()) {
+  return res.status(422).json({"erros":erros.array()})
+}else{
   const id = req.params.id;
   const query = "delete from tarefas where id = ?"
 
@@ -101,4 +131,5 @@ exports.excluir = (req,res) => {
     }
   })
 
+}
 }
